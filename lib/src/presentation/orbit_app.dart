@@ -47,7 +47,9 @@ class _OrbitAppState extends State<OrbitApp> {
               },
             },
             child: Focus(
-              autofocus: true,
+              // Let the launcher receive keyboard navigation, but do not
+              // compete with native text fields when a tool is open.
+              autofocus: widget.coordinator.mode == OrbitMode.launcher,
               child: Material(
                 color: widget.coordinator.mode == OrbitMode.launcher
                     ? Colors.transparent

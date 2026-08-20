@@ -9,6 +9,17 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // The launcher is drawn as a glass circle. Keep the native window itself
+    // transparent so AppKit does not fill the square outside that circle.
+    isOpaque = false
+    backgroundColor = .clear
+    hasShadow = false
+    titleVisibility = .hidden
+    titlebarAppearsTransparent = true
+    styleMask.insert(.fullSizeContentView)
+    contentView?.wantsLayer = true
+    contentView?.layer?.backgroundColor = NSColor.clear.cgColor
+
     FlutterMethodChannel(
       name: "launch_at_startup",
       binaryMessenger: flutterViewController.engine.binaryMessenger
