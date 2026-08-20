@@ -140,8 +140,10 @@ class NativeDesktopHost
     await windowManager.setBounds(
       Rect.fromLTWH(x, y, launcherSize.width, launcherSize.height),
     );
+    // The macOS implementation of show() activates the app asynchronously.
+    // Calling focus() immediately afterwards can deactivate it again because
+    // window_manager uses ignoringOtherApps: false in that method.
     await windowManager.show();
-    await windowManager.focus();
   }
 
   @override
@@ -155,7 +157,6 @@ class NativeDesktopHost
     await windowManager.setHasShadow(true);
     await windowManager.setBounds(_toolBounds);
     await windowManager.show();
-    await windowManager.focus();
   }
 
   @override
