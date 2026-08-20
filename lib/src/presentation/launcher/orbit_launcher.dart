@@ -86,11 +86,11 @@ class _LauncherCanvas extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xD80D151E),
-                      border: Border.all(color: Colors.white.withAlpha(24)),
+                      color: const Color(0xD9FFFFFF),
+                      border: Border.all(color: const Color(0xAAFFFFFF)),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0x88000000),
+                          color: Color(0x33435A67),
                           blurRadius: 40,
                           offset: Offset(0, 20),
                         ),
@@ -149,11 +149,11 @@ class _OrbitItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                   color: hovered
                       ? accent.withAlpha(34)
-                      : const Color(0xCC172330),
+                      : const Color(0xD9FFFFFF),
                   border: Border.all(
                     color: hovered
                         ? accent.withAlpha(210)
-                        : Colors.white.withAlpha(25),
+                        : const Color(0x8093A8B4),
                   ),
                   boxShadow: hovered
                       ? [BoxShadow(color: accent.withAlpha(45), blurRadius: 24)]
@@ -201,9 +201,9 @@ class _OrbitCenter extends StatelessWidget {
       height: 118,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xE315222D),
-        border: Border.all(color: Colors.white.withAlpha(28)),
-        boxShadow: const [BoxShadow(color: Color(0x45000000), blurRadius: 22)],
+        color: const Color(0xE6FFFFFF),
+        border: Border.all(color: const Color(0xAAFFFFFF)),
+        boxShadow: const [BoxShadow(color: Color(0x33435A67), blurRadius: 22)],
       ),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 130),
@@ -257,7 +257,7 @@ class _OrbitPainter extends CustomPainter {
     final ring = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = Colors.white.withAlpha(20);
+      ..color = const Color(0x4A677884);
     canvas.drawCircle(center, outer, ring);
     canvas.drawCircle(center, inner, ring);
     for (var index = 0; index < 8; index++) {

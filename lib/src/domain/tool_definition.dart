@@ -1,6 +1,6 @@
 enum ToolId { json, translator, diff, timestamp, sql }
 
-enum OrbitMode { hidden, launcher, tool }
+enum OrbitMode { hidden, launcher, tool, settings }
 
 class ToolDefinition {
   const ToolDefinition({

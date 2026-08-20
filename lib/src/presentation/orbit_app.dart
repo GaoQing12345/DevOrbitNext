@@ -5,6 +5,7 @@ import '../application/orbit_coordinator.dart';
 import '../domain/tool_definition.dart';
 import 'launcher/orbit_launcher.dart';
 import 'orbit_theme.dart';
+import 'settings_page.dart';
 import 'tool_workspace.dart';
 
 class OrbitApp extends StatefulWidget {
@@ -30,15 +31,16 @@ class _OrbitAppState extends State<OrbitApp> {
     return MaterialApp(
       title: 'Orbit Tools',
       debugShowCheckedModeBanner: false,
-      theme: OrbitTheme.dark(),
+      theme: OrbitTheme.light(),
       home: AnimatedBuilder(
         animation: widget.coordinator,
         builder: (context, _) {
           return CallbackShortcuts(
             bindings: {
               const SingleActivator(LogicalKeyboardKey.escape): () {
-                if (widget.coordinator.mode == OrbitMode.tool) {
-                  widget.coordinator.returnToLauncher();
+                if (widget.coordinator.mode == OrbitMode.tool ||
+                    widget.coordinator.mode == OrbitMode.settings) {
+                  widget.coordinator.hide();
                 } else {
                   widget.coordinator.hide();
                 }
@@ -55,6 +57,9 @@ class _OrbitAppState extends State<OrbitApp> {
                     coordinator: widget.coordinator,
                   ),
                   OrbitMode.tool => ToolWorkspace(
+                    coordinator: widget.coordinator,
+                  ),
+                  OrbitMode.settings => SettingsPage(
                     coordinator: widget.coordinator,
                   ),
                   OrbitMode.hidden => _BootScreen(

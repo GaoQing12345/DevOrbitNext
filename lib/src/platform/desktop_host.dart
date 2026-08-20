@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -9,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 abstract interface class DesktopHost {
   Future<void> initialize({
     required Future<void> Function() onToggleLauncher,
+    required Future<void> Function() onOpenSettings,
     required Future<void> Function() onHideRequested,
     required Future<void> Function() onQuitRequested,
     required VoidCallback onWindowBlur,
@@ -19,6 +21,8 @@ abstract interface class DesktopHost {
   Future<void> showToolWindow();
   Future<void> hide();
   Future<void> quit();
+  Future<String?> updateHotKey(HotKey hotKey);
+  Future<bool> setLaunchAtStartup(bool enabled);
 }
 
 class NativeDesktopHost
@@ -31,6 +35,7 @@ class NativeDesktopHost
 
   final bool _isMacOS;
   Future<void> Function()? _onToggleLauncher;
+  Future<void> Function()? _onOpenSettings;
   Future<void> Function()? _onHideRequested;
   Future<void> Function()? _onQuitRequested;
   VoidCallback? _onWindowBlur;
@@ -40,12 +45,14 @@ class NativeDesktopHost
   @override
   Future<void> initialize({
     required Future<void> Function() onToggleLauncher,
+    required Future<void> Function() onOpenSettings,
     required Future<void> Function() onHideRequested,
     required Future<void> Function() onQuitRequested,
     required VoidCallback onWindowBlur,
     required HotKey hotKey,
   }) async {
     _onToggleLauncher = onToggleLauncher;
+    _onOpenSettings = onOpenSettings;
     _onHideRequested = onHideRequested;
     _onQuitRequested = onQuitRequested;
     _onWindowBlur = onWindowBlur;
@@ -64,8 +71,14 @@ class NativeDesktopHost
         windowButtonVisibility: false,
       ),
     );
+    launchAtStartup.setup(
+      appName: 'Orbit Tools',
+      appPath: Platform.resolvedExecutable,
+      packageName: 'com.devorbit.orbittools',
+    );
     await _setupTray();
     await _registerHotKey(hotKey);
+    await windowManager.hide();
   }
 
   Future<void> _registerHotKey(HotKey hotKey) async {
@@ -85,6 +98,7 @@ class NativeDesktopHost
       Menu(
         items: [
           MenuItem(key: 'launcher', label: '打开轮盘'),
+          MenuItem(key: 'settings', label: '设置'),
           MenuItem(key: 'quit', label: '退出 Orbit Tools'),
         ],
       ),
@@ -162,6 +176,41 @@ class NativeDesktopHost
   }
 
   @override
+  Future<String?> updateHotKey(HotKey hotKey) async {
+    if (hotKey.modifiers?.isEmpty ?? true) {
+      return '快捷键至少需要一个修饰键。';
+    }
+    final previous = _registeredHotKey;
+    try {
+      await hotKeyManager.unregisterAll();
+      await hotKeyManager.register(
+        hotKey,
+        keyDownHandler: (_) => _onToggleLauncher?.call(),
+      );
+      _registeredHotKey = hotKey;
+      return null;
+    } on Object catch (error) {
+      if (previous != null) {
+        try {
+          await hotKeyManager.register(
+            previous,
+            keyDownHandler: (_) => _onToggleLauncher?.call(),
+          );
+          _registeredHotKey = previous;
+        } on Object catch (rollbackError) {
+          return '快捷键注册失败：$error；恢复旧快捷键也失败：$rollbackError';
+        }
+      }
+      return '快捷键注册失败：$error';
+    }
+  }
+
+  @override
+  Future<bool> setLaunchAtStartup(bool enabled) {
+    return enabled ? launchAtStartup.enable() : launchAtStartup.disable();
+  }
+
+  @override
   void onWindowClose() => _onHideRequested?.call();
 
   @override
@@ -173,6 +222,7 @@ class NativeDesktopHost
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
     if (menuItem.key == 'launcher') _onToggleLauncher?.call();
+    if (menuItem.key == 'settings') _onOpenSettings?.call();
     if (menuItem.key == 'quit') _onQuitRequested?.call();
   }
 }

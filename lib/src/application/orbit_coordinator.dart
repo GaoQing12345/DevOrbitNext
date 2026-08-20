@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 
 import '../domain/tool_definition.dart';
 import '../platform/desktop_host.dart';
@@ -29,6 +30,7 @@ class OrbitCoordinator extends ChangeNotifier {
   Future<void> initialize() async {
     await host.initialize(
       onToggleLauncher: toggleLauncher,
+      onOpenSettings: showSettings,
       onHideRequested: hide,
       onQuitRequested: quit,
       onWindowBlur: () {
@@ -46,8 +48,9 @@ class OrbitCoordinator extends ChangeNotifier {
     notifyListeners();
     try {
       await initialize();
-      await showLauncher();
+      await host.hide();
     } on Object catch (error) {
+      _initialized = false;
       _startupError = '桌面启动失败：$error';
       _mode = OrbitMode.hidden;
       notifyListeners();
@@ -94,6 +97,20 @@ class OrbitCoordinator extends ChangeNotifier {
     }
   }
 
+  Future<void> showSettings() async {
+    if (_transitioning) return;
+    _transitioning = true;
+    try {
+      _activeTool = null;
+      _mode = OrbitMode.settings;
+      _hoveredSlot = null;
+      notifyListeners();
+      await host.showToolWindow();
+    } finally {
+      _transitioning = false;
+    }
+  }
+
   Future<void> hide() async {
     if (_transitioning && _mode == OrbitMode.hidden) return;
     _mode = OrbitMode.hidden;
@@ -103,6 +120,25 @@ class OrbitCoordinator extends ChangeNotifier {
   }
 
   Future<void> returnToLauncher() => showLauncher();
+
+  Future<String?> updateHotKey(HotKey hotKey) async {
+    final error = await host.updateHotKey(hotKey);
+    if (error == null) await settings.setHotKey(hotKey);
+    notifyListeners();
+    return error;
+  }
+
+  Future<String?> updateLaunchAtStartup(bool enabled) async {
+    try {
+      final success = await host.setLaunchAtStartup(enabled);
+      if (!success) return '系统拒绝了开机启动设置。';
+      await settings.setLaunchAtStartup(enabled);
+      notifyListeners();
+      return null;
+    } on Object catch (error) {
+      return '更新开机启动失败：$error';
+    }
+  }
 
   void setHoveredSlot(int? slot) {
     if (_hoveredSlot == slot) return;

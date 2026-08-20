@@ -44,6 +44,7 @@ dependencies:
   sql_formatter: ^0.1.0
   diffutil_dart: ^5.0.0
   characters: ^1.4.1
+  launch_at_startup: ^0.5.1
 
 dev_dependencies:
   flutter_test:

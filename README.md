@@ -10,7 +10,7 @@ Orbit Tools 是 DevOrbit 的全新重构版本：一个面向 macOS 和 Windows 
 - `OrbitCoordinator` 只负责状态迁移，`DesktopHost` 只负责窗口和快捷键。
 - 工具是纯领域服务：文本输入 -> 结果输出，不监听系统剪贴板。
 - 工具之间没有共享控制器，也不启动独立子窗口。
-- 跨应用数据交换只通过用户主动选择的文件导入和导出完成。
+- 跨应用数据交换使用编辑器原生剪贴板或用户主动选择的文件导入/导出完成。
 
 ## 架构
 
@@ -35,7 +35,7 @@ flutter test
 flutter run -d macos
 ```
 
-Windows 构建需要 Visual Studio 的 Desktop C++ 工具链；macOS 构建需要完整 Xcode。应用启动后按 `⌘⇧Space`（Windows 为 `Ctrl⇧Space`）呼出轮盘，数字键 `1-5` 也可直接进入工具。
+Windows 构建需要 Visual Studio 的 Desktop C++ 工具链；macOS 构建需要完整 Xcode。应用启动后默认驻留系统托盘，不主动打开窗口。按默认 `⌘⇧Space`（Windows 为 `Ctrl⇧Space`）呼出轮盘，快捷键和开机启动可在托盘菜单的“设置”中修改。
 
 ## GitHub Actions 打包
 

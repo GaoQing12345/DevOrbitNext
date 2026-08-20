@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
 
 class OrbitTheme {
-  static const ink = Color(0xFF0B1016);
-  static const panel = Color(0xFF111923);
-  static const panelRaised = Color(0xFF182330);
-  static const accent = Color(0xFF65D9C1);
+  static const ink = Color(0xFFE7EEF3);
+  static const panel = Color(0xFFF7FAFC);
+  static const panelRaised = Color(0xFFFFFFFF);
+  static const accent = Color(0xFF168B78);
 
-  static ThemeData dark() {
+  static ThemeData light() {
     final scheme =
         ColorScheme.fromSeed(
           seedColor: accent,
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
         ).copyWith(
           surface: ink,
-          surfaceContainerLowest: const Color(0xFF080C11),
+          surfaceContainerLowest: const Color(0xFFDDE7ED),
           surfaceContainerLow: panel,
           surfaceContainer: panelRaised,
-          surfaceContainerHigh: const Color(0xFF203040),
+          surfaceContainerHigh: const Color(0xFFE8F0F4),
+          surfaceContainerHighest: const Color(0xFFD9E4EA),
           primary: accent,
-          onPrimary: const Color(0xFF06251F),
-          secondary: const Color(0xFF9CB8CB),
-          onSurface: const Color(0xFFE9F1F3),
-          onSurfaceVariant: const Color(0xFFA6B4BE),
-          outline: const Color(0xFF344655),
-          outlineVariant: const Color(0xFF243542),
-          error: const Color(0xFFFF8F92),
+          onPrimary: Colors.white,
+          primaryContainer: const Color(0xFFCDEDE6),
+          onPrimaryContainer: const Color(0xFF073D34),
+          secondary: const Color(0xFF5D77A4),
+          onSecondary: Colors.white,
+          onSurface: const Color(0xFF1B2A34),
+          onSurfaceVariant: const Color(0xFF60717D),
+          outline: const Color(0xFF9AAEBA),
+          outlineVariant: const Color(0xFFD1DEE5),
+          error: const Color(0xFFB53D4B),
         );
-    final base = ThemeData.dark(useMaterial3: true);
+    final base = ThemeData.light(useMaterial3: true);
     final text = base.textTheme.apply(
       fontFamily: 'SF Pro Display',
       fontFamilyFallback: const ['Segoe UI', 'PingFang SC', 'Noto Sans SC'],
@@ -54,7 +58,7 @@ class OrbitTheme {
         ),
         titleMedium: text.titleMedium?.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0,
         ),
         bodyMedium: text.bodyMedium?.copyWith(
@@ -64,8 +68,8 @@ class OrbitTheme {
         ),
         labelMedium: text.labelMedium?.copyWith(
           fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.4,
+          fontWeight: FontWeight.w700,
+          letterSpacing: .4,
         ),
       ),
       dividerTheme: DividerThemeData(
@@ -77,7 +81,7 @@ class OrbitTheme {
       cardTheme: CardThemeData(
         margin: EdgeInsets.zero,
         elevation: 0,
-        color: scheme.surfaceContainerLow.withAlpha(225),
+        color: scheme.surfaceContainerLow.withAlpha(235),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(color: scheme.outlineVariant),
@@ -85,7 +89,7 @@ class OrbitTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF0C131B),
+        fillColor: Colors.white.withAlpha(205),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: scheme.outlineVariant),
@@ -103,12 +107,13 @@ class OrbitTheme {
           vertical: 13,
         ),
         hintStyle: text.bodyMedium?.copyWith(
-          color: scheme.onSurfaceVariant.withAlpha(160),
+          color: scheme.onSurfaceVariant.withAlpha(175),
         ),
+        labelStyle: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: const Color(0xFF253543),
+          color: const Color(0xFF263A47),
           borderRadius: BorderRadius.circular(7),
         ),
         textStyle: text.bodySmall?.copyWith(color: Colors.white),

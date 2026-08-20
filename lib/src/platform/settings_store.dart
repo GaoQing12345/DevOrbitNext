@@ -6,12 +6,18 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrbitSettings extends ChangeNotifier {
-  OrbitSettings(this._preferences, {required this._hotKey});
+  OrbitSettings(
+    this._preferences, {
+    required this._hotKey,
+    required this._launchAtStartup,
+  });
 
   final SharedPreferences _preferences;
   HotKey _hotKey;
+  bool _launchAtStartup;
 
   HotKey get hotKey => _hotKey;
+  bool get launchAtStartup => _launchAtStartup;
 
   static Future<OrbitSettings> load() async {
     final preferences = await SharedPreferences.getInstance();
@@ -20,18 +26,33 @@ class OrbitSettings extends ChangeNotifier {
       try {
         final decoded = jsonDecode(raw);
         if (decoded is Map<String, dynamic>) {
-          return OrbitSettings(preferences, hotKey: HotKey.fromJson(decoded));
+          return OrbitSettings(
+            preferences,
+            hotKey: HotKey.fromJson(decoded),
+            launchAtStartup:
+                preferences.getBool('orbit.launchAtStartup') ?? false,
+          );
         }
       } on Object {
         // A malformed preference falls back to the portable default.
       }
     }
-    return OrbitSettings(preferences, hotKey: _defaultHotKey());
+    return OrbitSettings(
+      preferences,
+      hotKey: _defaultHotKey(),
+      launchAtStartup: preferences.getBool('orbit.launchAtStartup') ?? false,
+    );
   }
 
   Future<void> setHotKey(HotKey hotKey) async {
     _hotKey = hotKey;
     await _preferences.setString('orbit.hotkey', jsonEncode(hotKey.toJson()));
+    notifyListeners();
+  }
+
+  Future<void> setLaunchAtStartup(bool enabled) async {
+    _launchAtStartup = enabled;
+    await _preferences.setBool('orbit.launchAtStartup', enabled);
     notifyListeners();
   }
 

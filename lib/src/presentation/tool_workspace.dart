@@ -125,9 +125,16 @@ class _WorkspaceRail extends StatelessWidget {
               const SizedBox(height: 8),
               _RailButton(
                 icon: Icons.keyboard_rounded,
-                label: '⌘⇧Space 呼出',
+                label: '轮盘快捷键',
                 selected: false,
-                onTap: () {},
+                onTap: coordinator.showSettings,
+              ),
+              const SizedBox(height: 4),
+              _RailButton(
+                icon: Icons.tune_rounded,
+                label: '设置',
+                selected: false,
+                onTap: coordinator.showSettings,
               ),
               const SizedBox(height: 4),
               _RailButton(
