@@ -74,7 +74,7 @@ class NativeDesktopHost
     launchAtStartup.setup(
       appName: 'Orbit Tools',
       appPath: Platform.resolvedExecutable,
-      packageName: 'com.devorbit.orbittools',
+      packageName: 'com.devorbit.devOrbitNext',
     );
     await _setupTray();
     await _registerHotKey(hotKey);
