@@ -37,6 +37,25 @@ flutter run -d macos
 
 Windows 构建需要 Visual Studio 的 Desktop C++ 工具链；macOS 构建需要完整 Xcode。应用启动后按 `⌘⇧Space`（Windows 为 `Ctrl⇧Space`）呼出轮盘，数字键 `1-5` 也可直接进入工具。
 
+## GitHub Actions 打包
+
+仓库内置 `.github/workflows/package.yml`：
+
+- Pull Request 和 `main` 推送：运行静态检查和测试。
+- GitHub Actions 手动运行：构建 macOS、Windows 压缩包，并在 Actions 的 Artifacts 下载。
+- 推送版本标签：构建后自动创建 GitHub Release，并附上两个压缩包。
+
+手动打包：打开 GitHub 仓库的 `Actions`，选择 `Check and Package Orbit Tools`，点击 `Run workflow`。
+
+发布版本：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+当前产物是未签名的 `.app` 和 Windows `.zip`。macOS 公证、Windows 安装器和代码签名需要另外配置证书 Secrets，不能只靠 Flutter 构建完成。
+
 ## 工具
 
 - JSON Studio：严格校验、修复、格式化、压缩、文件导入/导出
