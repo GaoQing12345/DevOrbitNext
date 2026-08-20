@@ -11,7 +11,6 @@ Future<void> main() async {
   final settings = await OrbitSettings.load();
   final host = NativeDesktopHost();
   final coordinator = OrbitCoordinator(host: host, settings: settings);
-  await coordinator.initialize();
 
   runApp(OrbitApp(coordinator: coordinator));
 }

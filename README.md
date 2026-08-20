@@ -8,7 +8,7 @@ Orbit Tools 是 DevOrbit 的全新重构版本：一个面向 macOS 和 Windows 
 
 - 单进程、单 Flutter 窗口，状态只有 `hidden / launcher / tool` 三种模式。
 - `OrbitCoordinator` 只负责状态迁移，`DesktopHost` 只负责窗口和快捷键。
-- 工具是纯领域服务：文本输入 -> 结果输出，不读取或写入系统剪贴板。
+- 工具是纯领域服务：文本输入 -> 结果输出，不监听系统剪贴板。
 - 工具之间没有共享控制器，也不启动独立子窗口。
 - 跨应用数据交换只通过用户主动选择的文件导入和导出完成。
 
@@ -22,7 +22,7 @@ lib/src/
   presentation/轮盘、玻璃工作台、工具页
 ```
 
-系统剪贴板不在依赖、Dart 代码、macOS channel 或 Windows runner 中出现。翻译 API Key 只作为当前请求的输入，不会写入剪贴板或诊断日志。
+工具页面使用 Flutter 原生编辑器的标准剪贴板行为：聚焦输入框后直接使用 `Ctrl/Cmd+V` 和 `Ctrl/Cmd+C`。应用不监听剪贴板变化，也不接管粘贴事件。翻译 API Key 只作为当前请求的输入，不会写入剪贴板或诊断日志。
 
 ## 本地开发
 
@@ -41,7 +41,7 @@ Windows 构建需要 Visual Studio 的 Desktop C++ 工具链；macOS 构建需�
 
 仓库内置 `.github/workflows/package.yml`：
 
-- Pull Request 和 `main` 推送：运行静态检查和测试。
+- Pull Request 和 `main` 推送：只运行静态检查和测试，不打包。
 - GitHub Actions 手动运行：构建 macOS、Windows 压缩包，并在 Actions 的 Artifacts 下载。
 - 推送版本标签：构建后自动创建 GitHub Release，并附上两个压缩包。
 

@@ -16,10 +16,15 @@ class OrbitCoordinator extends ChangeNotifier {
   ToolId? _activeTool;
   int? _hoveredSlot;
   bool _transitioning = false;
+  bool _initializing = false;
+  bool _initialized = false;
+  String? _startupError;
 
   OrbitMode get mode => _mode;
   ToolId? get activeTool => _activeTool;
   int? get hoveredSlot => _hoveredSlot;
+  bool get initializing => _initializing;
+  String? get startupError => _startupError;
 
   Future<void> initialize() async {
     await host.initialize(
@@ -31,9 +36,28 @@ class OrbitCoordinator extends ChangeNotifier {
       },
       hotKey: settings.hotKey,
     );
+    _initialized = true;
   }
 
-  Future<void> afterFirstFrame() => showLauncher();
+  Future<void> start() async {
+    if (_initialized || _initializing) return;
+    _initializing = true;
+    _startupError = null;
+    notifyListeners();
+    try {
+      await initialize();
+      await showLauncher();
+    } on Object catch (error) {
+      _startupError = '桌面启动失败：$error';
+      _mode = OrbitMode.hidden;
+      notifyListeners();
+    } finally {
+      _initializing = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> afterFirstFrame() => start();
 
   Future<void> toggleLauncher() async {
     if (_mode == OrbitMode.launcher) {
