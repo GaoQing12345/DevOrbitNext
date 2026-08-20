@@ -6,11 +6,7 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrbitSettings extends ChangeNotifier {
-  OrbitSettings(
-    this._preferences, {
-    required this._hotKey,
-    required this._launchAtStartup,
-  });
+  OrbitSettings(this._preferences, this._hotKey, this._launchAtStartup);
 
   final SharedPreferences _preferences;
   HotKey _hotKey;
@@ -28,9 +24,8 @@ class OrbitSettings extends ChangeNotifier {
         if (decoded is Map<String, dynamic>) {
           return OrbitSettings(
             preferences,
-            hotKey: HotKey.fromJson(decoded),
-            launchAtStartup:
-                preferences.getBool('orbit.launchAtStartup') ?? false,
+            HotKey.fromJson(decoded),
+            preferences.getBool('orbit.launchAtStartup') ?? false,
           );
         }
       } on Object {
@@ -39,8 +34,8 @@ class OrbitSettings extends ChangeNotifier {
     }
     return OrbitSettings(
       preferences,
-      hotKey: _defaultHotKey(),
-      launchAtStartup: preferences.getBool('orbit.launchAtStartup') ?? false,
+      _defaultHotKey(),
+      preferences.getBool('orbit.launchAtStartup') ?? false,
     );
   }
 
