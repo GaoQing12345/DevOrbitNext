@@ -1,0 +1,50 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class OrbitSettings extends ChangeNotifier {
+  OrbitSettings(this._preferences, {required this._hotKey});
+
+  final SharedPreferences _preferences;
+  HotKey _hotKey;
+
+  HotKey get hotKey => _hotKey;
+
+  static Future<OrbitSettings> load() async {
+    final preferences = await SharedPreferences.getInstance();
+    final raw = preferences.getString('orbit.hotkey');
+    if (raw != null) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          return OrbitSettings(preferences, hotKey: HotKey.fromJson(decoded));
+        }
+      } on Object {
+        // A malformed preference falls back to the portable default.
+      }
+    }
+    return OrbitSettings(preferences, hotKey: _defaultHotKey());
+  }
+
+  Future<void> setHotKey(HotKey hotKey) async {
+    _hotKey = hotKey;
+    await _preferences.setString('orbit.hotkey', jsonEncode(hotKey.toJson()));
+    notifyListeners();
+  }
+
+  static HotKey _defaultHotKey() {
+    return HotKey(
+      identifier: 'dev-orbit-next-launcher',
+      key: PhysicalKeyboardKey.space,
+      modifiers: [
+        defaultTargetPlatform == TargetPlatform.macOS
+            ? HotKeyModifier.meta
+            : HotKeyModifier.control,
+        HotKeyModifier.shift,
+      ],
+    );
+  }
+}
