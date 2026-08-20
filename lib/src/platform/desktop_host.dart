@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -32,6 +33,7 @@ class NativeDesktopHost
 
   static const launcherSize = Size.square(420);
   static const toolSize = Size(1100, 760);
+  static const _macWindowChannel = MethodChannel('dev_orbit/window');
 
   final bool _isMacOS;
   Future<void> Function()? _onToggleLauncher;
@@ -111,7 +113,7 @@ class NativeDesktopHost
     if (currentBounds.width >= 820 && currentBounds.height >= 580) {
       _toolBounds = currentBounds;
     }
-    final cursor = await screenRetriever.getCursorScreenPoint();
+    final cursor = await _getCursorScreenPoint();
     final displays = await screenRetriever.getAllDisplays();
     Display? target;
     for (final display in displays) {
@@ -144,6 +146,7 @@ class NativeDesktopHost
     // Calling focus() immediately afterwards can deactivate it again because
     // window_manager uses ignoringOtherApps: false in that method.
     await windowManager.show();
+    await _activateMacWindow();
   }
 
   @override
@@ -157,6 +160,23 @@ class NativeDesktopHost
     await windowManager.setHasShadow(true);
     await windowManager.setBounds(_toolBounds);
     await windowManager.show();
+    await _activateMacWindow();
+  }
+
+  Future<void> _activateMacWindow() async {
+    if (_isMacOS) await _macWindowChannel.invokeMethod<void>('activate');
+  }
+
+  Future<Offset> _getCursorScreenPoint() async {
+    if (!_isMacOS) return screenRetriever.getCursorScreenPoint();
+    final point = await _macWindowChannel.invokeMapMethod<String, num>(
+      'cursorScreenPoint',
+    );
+    if (point == null) return screenRetriever.getCursorScreenPoint();
+    return Offset(
+      (point['dx'] ?? 0).toDouble(),
+      (point['dy'] ?? 0).toDouble(),
+    );
   }
 
   @override

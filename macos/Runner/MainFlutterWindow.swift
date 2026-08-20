@@ -11,6 +11,9 @@ class MainFlutterWindow: NSWindow {
 
     // The launcher is drawn as a glass circle. Keep the native window itself
     // transparent so AppKit does not fill the square outside that circle.
+    flutterViewController.view.wantsLayer = true
+    flutterViewController.view.layer?.isOpaque = false
+    flutterViewController.view.layer?.backgroundColor = NSColor.clear.cgColor
     isOpaque = false
     backgroundColor = .clear
     hasShadow = false
@@ -19,6 +22,24 @@ class MainFlutterWindow: NSWindow {
     styleMask.insert(.fullSizeContentView)
     contentView?.wantsLayer = true
     contentView?.layer?.backgroundColor = NSColor.clear.cgColor
+
+    FlutterMethodChannel(
+      name: "dev_orbit/window",
+      binaryMessenger: flutterViewController.engine.binaryMessenger
+    ).setMethodCallHandler { call, result in
+      switch call.method {
+      case "activate":
+        NSApp.activate(ignoringOtherApps: true)
+        self.makeKeyAndOrderFront(nil)
+        result(nil)
+      case "cursorScreenPoint":
+        let primaryHeight = NSScreen.screens.first?.frame.maxY ?? 0
+        let mouse = NSEvent.mouseLocation
+        result(["dx": mouse.x, "dy": primaryHeight - mouse.y])
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
 
     FlutterMethodChannel(
       name: "launch_at_startup",
