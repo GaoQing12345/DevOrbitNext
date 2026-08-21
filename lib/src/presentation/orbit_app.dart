@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -52,7 +54,9 @@ class _OrbitAppState extends State<OrbitApp> {
               autofocus: widget.coordinator.mode == OrbitMode.launcher,
               child: Material(
                 color: widget.coordinator.mode == OrbitMode.launcher
-                    ? Colors.transparent
+                    ? (Platform.isWindows
+                          ? const Color(0xFFE9F0F1)
+                          : Colors.transparent)
                     : OrbitTheme.ink,
                 child: switch (widget.coordinator.mode) {
                   OrbitMode.launcher => OrbitLauncher(

@@ -32,6 +32,7 @@ class FlutterWindow : public Win32Window {
   void ArmClipboardCapture(std::optional<int64_t> session_id);
   void ResetClipboardCapture();
   void NotifyClipboardChanged();
+  void RetryClipboardText();
   static std::optional<std::string> ReadClipboardText();
 
   // The project to run.
@@ -48,6 +49,7 @@ class FlutterWindow : public Win32Window {
   std::optional<int64_t> clipboard_capture_session_id_;
   DWORD clipboard_baseline_sequence_ = 0;
   std::optional<std::string> clipboard_pending_text_;
+  int clipboard_retry_count_ = 0;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

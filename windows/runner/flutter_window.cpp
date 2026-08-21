@@ -8,6 +8,12 @@
 #include "flutter/generated_plugin_registrant.h"
 #include "flutter/standard_method_codec.h"
 
+namespace {
+constexpr UINT_PTR kClipboardRetryTimer = 0xD421;
+constexpr UINT kClipboardRetryDelayMs = 24;
+constexpr int kClipboardTextRetryLimit = 16;
+}
+
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
@@ -102,7 +108,12 @@ void FlutterWindow::ArmClipboardCapture(std::optional<int64_t> session_id) {
   if (clipboard_capture_armed_ && !clipboard_capture_session_id_ &&
       session_id.has_value()) {
     clipboard_capture_session_id_ = session_id;
-    if (clipboard_change_sent_) NotifyClipboardChanged();
+    if (clipboard_change_sent_ && clipboard_pending_text_.has_value()) {
+      NotifyClipboardChanged();
+    } else if (clipboard_change_sent_) {
+      SetTimer(GetHandle(), kClipboardRetryTimer, kClipboardRetryDelayMs,
+               nullptr);
+    }
     return;
   }
   clipboard_capture_armed_ = true;
@@ -114,12 +125,14 @@ void FlutterWindow::ArmClipboardCapture(std::optional<int64_t> session_id) {
 }
 
 void FlutterWindow::ResetClipboardCapture() {
+  KillTimer(GetHandle(), kClipboardRetryTimer);
   clipboard_capture_armed_ = false;
   clipboard_change_sent_ = false;
   clipboard_notification_sent_ = false;
   clipboard_capture_session_id_.reset();
   clipboard_baseline_sequence_ = 0;
   clipboard_pending_text_.reset();
+  clipboard_retry_count_ = 0;
 }
 
 std::optional<std::string> FlutterWindow::ReadClipboardText() {
@@ -158,6 +171,12 @@ void FlutterWindow::NotifyClipboardChanged() {
   if (!clipboard_change_sent_) {
     clipboard_change_sent_ = true;
     clipboard_pending_text_ = ReadClipboardText();
+    if (!clipboard_pending_text_.has_value()) {
+      clipboard_retry_count_ = 0;
+      SetTimer(GetHandle(), kClipboardRetryTimer, kClipboardRetryDelayMs,
+               nullptr);
+      return;
+    }
   }
   if (!clipboard_capture_session_id_) return;
   clipboard_notification_sent_ = true;
@@ -171,6 +190,31 @@ void FlutterWindow::NotifyClipboardChanged() {
   clipboard_channel_->InvokeMethod(
       "clipboardChanged",
       std::make_unique<flutter::EncodableValue>(arguments));
+}
+
+void FlutterWindow::RetryClipboardText() {
+  if (!clipboard_capture_armed_ || clipboard_notification_sent_) {
+    KillTimer(GetHandle(), kClipboardRetryTimer);
+    return;
+  }
+  clipboard_pending_text_ = ReadClipboardText();
+  if (clipboard_pending_text_.has_value() ||
+      ++clipboard_retry_count_ >= kClipboardTextRetryLimit) {
+    KillTimer(GetHandle(), kClipboardRetryTimer);
+    if (!clipboard_pending_text_.has_value() ||
+        !clipboard_capture_session_id_) {
+      return;
+    }
+    clipboard_notification_sent_ = true;
+    flutter::EncodableMap arguments;
+    arguments[flutter::EncodableValue("sessionId")] =
+        flutter::EncodableValue(*clipboard_capture_session_id_);
+    arguments[flutter::EncodableValue("text")] =
+        flutter::EncodableValue(*clipboard_pending_text_);
+    clipboard_channel_->InvokeMethod(
+        "clipboardChanged",
+        std::make_unique<flutter::EncodableValue>(arguments));
+  }
 }
 
 LRESULT
@@ -195,6 +239,9 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       break;
     case WM_CLIPBOARDUPDATE:
       NotifyClipboardChanged();
+      break;
+    case WM_TIMER:
+      if (wparam == kClipboardRetryTimer) RetryClipboardText();
       break;
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
