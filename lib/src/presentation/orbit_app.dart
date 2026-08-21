@@ -54,7 +54,7 @@ class _OrbitAppState extends State<OrbitApp> {
               autofocus: widget.coordinator.mode == OrbitMode.launcher,
               child: Material(
                 color: widget.coordinator.mode == OrbitMode.launcher
-                    ? (Platform.isWindows
+                    ? ((Platform.isWindows || Platform.isMacOS)
                           ? const Color(0xFFE9F0F1)
                           : Colors.transparent)
                     : OrbitTheme.ink,

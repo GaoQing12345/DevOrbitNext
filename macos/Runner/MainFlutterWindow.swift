@@ -25,6 +25,7 @@ class MainFlutterWindow: NSWindow {
     flutterViewController.view.wantsLayer = true
     flutterViewController.view.layer?.isOpaque = false
     flutterViewController.view.layer?.backgroundColor = NSColor.clear.cgColor
+    flutterViewController.backgroundColor = NSColor.clear
     isOpaque = false
     backgroundColor = .clear
     hasShadow = false
@@ -139,6 +140,14 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
+    isOpaque = false
+    backgroundColor = NSColor.clear
+    contentView?.wantsLayer = true
+    contentView?.layer?.isOpaque = false
+    contentView?.layer?.backgroundColor = NSColor.clear.cgColor
+    flutterViewController.backgroundColor = NSColor.clear
+    flutterViewController.view.layer?.isOpaque = false
+    flutterViewController.view.layer?.backgroundColor = NSColor.clear.cgColor
     setLauncherMask(true)
   }
 
