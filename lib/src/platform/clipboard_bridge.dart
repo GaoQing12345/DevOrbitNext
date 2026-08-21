@@ -116,10 +116,16 @@ class OrbitClipboardBridge {
     _snapshot = snapshot;
     _lastObservedText = baseline;
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(
-      const Duration(milliseconds: 90),
-      (_) => unawaited(_pollClipboard(snapshot)),
-    );
+    // macOS has a native pasteboard capture path. Avoid a second Flutter-side
+    // polling loop there because Clipboard.getData can briefly block while a
+    // clipboard manager is publishing its formats. Windows keeps the polling
+    // fallback because QuickClipboard may publish text in several stages.
+    if (!Platform.isMacOS) {
+      _pollTimer = Timer.periodic(
+        const Duration(milliseconds: 90),
+        (_) => unawaited(_pollClipboard(snapshot)),
+      );
+    }
     final pendingText = _pendingNativeSession == session
         ? _pendingNativeText
         : null;
@@ -130,7 +136,7 @@ class OrbitClipboardBridge {
     _pendingNativeChange = false;
     if (pendingText != null) {
       await _insert(snapshot, pendingText);
-    } else if (pendingChange) {
+    } else if (pendingChange && !Platform.isMacOS) {
       unawaited(_pollClipboard(snapshot));
     }
   }
@@ -233,7 +239,7 @@ class OrbitClipboardBridge {
     }
     if (text != null && text.isNotEmpty) {
       await _insert(snapshot, text);
-    } else {
+    } else if (!Platform.isMacOS) {
       unawaited(_pollClipboard(snapshot));
     }
   }

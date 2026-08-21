@@ -202,8 +202,12 @@ class MainFlutterWindow: NSWindow {
     }
     let pasteboard = NSPasteboard.general
     guard pasteboard.changeCount != clipboardBaselineChangeCount else { return }
-    clipboardChangeSent = true
     clipboardPendingText = pasteboard.string(forType: .string)
+    // QuickClipboard can publish the pasteboard in multiple format passes.
+    // Keep the short native timer alive until plain text is available instead
+    // of notifying Flutter with an empty payload and losing the paste.
+    guard clipboardPendingText != nil else { return }
+    clipboardChangeSent = true
     notifyClipboardChange()
   }
 
