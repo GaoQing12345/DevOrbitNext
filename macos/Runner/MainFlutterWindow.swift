@@ -3,6 +3,7 @@ import FlutterMacOS
 import ServiceManagement
 
 class MainFlutterWindow: NSWindow {
+  private weak var flutterView: NSView?
   private var clipboardChannel: FlutterMethodChannel?
   private var clipboardTimer: Timer?
   private var clipboardCaptureArmed = false
@@ -16,6 +17,7 @@ class MainFlutterWindow: NSWindow {
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
+    self.flutterView = flutterViewController.view
     self.setFrame(windowFrame, display: true)
 
     // The launcher is drawn as a glass circle. Keep the native window itself
@@ -145,18 +147,29 @@ class MainFlutterWindow: NSWindow {
     content.wantsLayer = true
     if enabled {
       content.layoutSubtreeIfNeeded()
-      let bounds = content.bounds
-      let mask = CAShapeLayer()
-      mask.frame = bounds
-      mask.path = CGPath(
-        ellipseIn: bounds.insetBy(dx: 1, dy: 1),
-        transform: nil
-      )
-      content.layer?.mask = mask
+      applyCircleMask(to: content)
+      if let flutterView {
+        flutterView.wantsLayer = true
+        flutterView.layer?.isOpaque = false
+        flutterView.layer?.backgroundColor = NSColor.clear.cgColor
+        applyCircleMask(to: flutterView)
+      }
       content.layer?.backgroundColor = NSColor.clear.cgColor
     } else {
       content.layer?.mask = nil
+      flutterView?.layer?.mask = nil
     }
+  }
+
+  private func applyCircleMask(to view: NSView) {
+    let bounds = view.bounds
+    let mask = CAShapeLayer()
+    mask.frame = bounds
+    mask.path = CGPath(
+      ellipseIn: bounds.insetBy(dx: 1, dy: 1),
+      transform: nil
+    )
+    view.layer?.mask = mask
   }
 
   private func armClipboardCapture(sessionId: Int64) {
