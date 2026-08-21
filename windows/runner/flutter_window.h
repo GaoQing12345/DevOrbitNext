@@ -2,9 +2,14 @@
 #define RUNNER_FLUTTER_WINDOW_H_
 
 #include <flutter/dart_project.h>
+#include <flutter/encodable_value.h>
 #include <flutter/flutter_view_controller.h>
+#include <flutter/method_channel.h>
 
 #include <memory>
+#include <cstdint>
+#include <optional>
+#include <string>
 
 #include "win32_window.h"
 
@@ -23,11 +28,26 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  void RegisterClipboardChannel();
+  void ArmClipboardCapture(std::optional<int64_t> session_id);
+  void ResetClipboardCapture();
+  void NotifyClipboardChanged();
+  static std::optional<std::string> ReadClipboardText();
+
   // The project to run.
   flutter::DartProject project_;
 
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
+      clipboard_channel_;
+  bool clipboard_listener_registered_ = false;
+  bool clipboard_capture_armed_ = false;
+  bool clipboard_change_sent_ = false;
+  bool clipboard_notification_sent_ = false;
+  std::optional<int64_t> clipboard_capture_session_id_;
+  DWORD clipboard_baseline_sequence_ = 0;
+  std::optional<std::string> clipboard_pending_text_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

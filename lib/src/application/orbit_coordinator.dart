@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 import '../domain/tool_definition.dart';
+import '../platform/clipboard_bridge.dart';
 import '../platform/desktop_host.dart';
 import '../platform/settings_store.dart';
 
@@ -34,6 +35,7 @@ class OrbitCoordinator extends ChangeNotifier {
       onHideRequested: hide,
       onQuitRequested: quit,
       onWindowBlur: () {
+        OrbitClipboardBridge.instance.onWindowBlur();
         if (_mode == OrbitMode.launcher) unawaited(hide());
       },
       hotKey: settings.hotKey,

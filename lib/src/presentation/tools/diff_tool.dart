@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/text_compare_engine.dart';
 import '../../domain/text_compare_models.dart';
+import '../../platform/clipboard_bridge.dart';
 import '../tool_workspace.dart';
 import 'tool_primitives.dart';
 
@@ -169,7 +170,7 @@ class _DiffEditor extends StatelessWidget {
       '${controller.text.split('\n').length} 行',
       style: Theme.of(context).textTheme.bodySmall,
     ),
-    child: TextField(
+    child: ClipboardTextField(
       controller: controller,
       onChanged: onChanged,
       minLines: 20,

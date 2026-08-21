@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/sql_log_converter.dart';
+import '../../platform/clipboard_bridge.dart';
 import '../tool_workspace.dart';
 import 'tool_primitives.dart';
 
@@ -89,7 +90,7 @@ class _SqlToolState extends State<SqlTool> {
       children: [
         ToolPanel(
           title: '日志输入',
-          child: TextField(
+          child: ClipboardTextField(
             controller: _input,
             onChanged: (_) => _convert(),
             minLines: 8,

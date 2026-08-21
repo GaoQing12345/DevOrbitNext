@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/json_transformer.dart';
+import '../../platform/clipboard_bridge.dart';
 import '../tool_workspace.dart';
 import 'tool_primitives.dart';
 
@@ -99,7 +100,7 @@ class _JsonToolState extends State<JsonTool> {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),
-              child: TextField(
+              child: ClipboardTextField(
                 controller: _input,
                 minLines: vertical ? 12 : 22,
                 maxLines: vertical ? 18 : 30,
@@ -129,7 +130,7 @@ class _JsonToolState extends State<JsonTool> {
                         fontSize: 11,
                       ),
                     ),
-              child: TextField(
+              child: ClipboardTextField(
                 controller: _output,
                 readOnly: true,
                 minLines: vertical ? 12 : 22,

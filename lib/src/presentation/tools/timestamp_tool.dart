@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/timestamp_converter.dart';
+import '../../platform/clipboard_bridge.dart';
 import 'tool_primitives.dart';
 
 class TimestampTool extends StatefulWidget {
@@ -63,7 +64,7 @@ class _TimestampToolState extends State<TimestampTool> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
+                ClipboardTextField(
                   controller: _timestamp,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: '秒或毫秒时间戳'),
@@ -86,7 +87,7 @@ class _TimestampToolState extends State<TimestampTool> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
+                ClipboardTextField(
                   controller: _date,
                   decoration: const InputDecoration(
                     labelText: 'yyyy-MM-dd HH:mm:ss.SSS',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/deepl_translation_client.dart';
 import '../../domain/translation_language.dart';
+import '../../platform/clipboard_bridge.dart';
 import 'tool_primitives.dart';
 
 class TranslatorTool extends StatefulWidget {
@@ -61,7 +62,7 @@ class _TranslatorToolState extends State<TranslatorTool> {
     children: [
       ToolPanel(
         title: 'DeepL API',
-        child: TextField(
+        child: ClipboardTextField(
           controller: _apiKey,
           obscureText: true,
           decoration: const InputDecoration(
@@ -76,7 +77,7 @@ class _TranslatorToolState extends State<TranslatorTool> {
         builder: (context, constraints) {
           final source = ToolPanel(
             title: '原文',
-            child: TextField(
+            child: ClipboardTextField(
               controller: _source,
               minLines: 12,
               maxLines: 18,

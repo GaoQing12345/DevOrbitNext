@@ -142,10 +142,20 @@ class NativeDesktopHost
     await windowManager.setBounds(
       Rect.fromLTWH(x, y, launcherSize.width, launcherSize.height),
     );
+    if (_isMacOS) {
+      await _macWindowChannel.invokeMethod<void>('setLauncherMask', {
+        'enabled': true,
+      });
+    }
     // The macOS implementation of show() activates the app asynchronously.
     // Calling focus() immediately afterwards can deactivate it again because
     // window_manager uses ignoringOtherApps: false in that method.
     await windowManager.show();
+    if (_isMacOS) {
+      await _macWindowChannel.invokeMethod<void>('setLauncherMask', {
+        'enabled': true,
+      });
+    }
     await _activateMacWindow();
   }
 
@@ -158,6 +168,11 @@ class NativeDesktopHost
     await windowManager.setAlwaysOnTop(false);
     await windowManager.setSkipTaskbar(false);
     await windowManager.setHasShadow(true);
+    if (_isMacOS) {
+      await _macWindowChannel.invokeMethod<void>('setLauncherMask', {
+        'enabled': false,
+      });
+    }
     await windowManager.setBounds(_toolBounds);
     await windowManager.show();
     await _activateMacWindow();
@@ -173,10 +188,7 @@ class NativeDesktopHost
       'cursorScreenPoint',
     );
     if (point == null) return screenRetriever.getCursorScreenPoint();
-    return Offset(
-      (point['dx'] ?? 0).toDouble(),
-      (point['dy'] ?? 0).toDouble(),
-    );
+    return Offset((point['dx'] ?? 0).toDouble(), (point['dy'] ?? 0).toDouble());
   }
 
   @override
